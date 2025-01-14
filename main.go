@@ -1,51 +1,50 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
+
 	"github.com/antlr4-go/antlr/v4"
-	"github.com/bakyazi/esgrammar/parser"
-	"html/template"
-	"log"
-	"net/http"
+	"github.com/team/esgrammar/parser"
 )
 
 func main() {
-	tmpl := template.Must(template.ParseFiles("templates/index.html"))
+	// 示例 IQL 查询
+	iql := "(COMMENT=\"red1\" OR 'color1'=\"blue\") and ('pric1e'=2000 and 'mode1l'=\"hyundai\") and '计划部署时间' > sum(1,100) and '类型' in [ \"线上Bug\"] and '创建时间' >= '2024-01-01' and '创建时间' <= '2024-03-31' and '所属产品' = \"code\" and 'xxx' not in [\"a\",\"b\",\"c\"]  and 'QA引入原因分析' in ( \"无法复现\") and '状态' != \"已取消\" order by \"orderField\" desc, \"orderField2\" desc,\"orderField3\" "
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		tmpl.Execute(w, nil)
-	})
+	// 创建词法分析器
+	input := antlr.NewInputStream(iql)
+	lexer := parser.NewIqlLexer(input)
+	tokens := antlr.NewCommonTokenStream(lexer, 0)
 
-	http.HandleFunc("/convert", convertHandler)
+	// 创建解析器
+	p := parser.NewIqlParser(tokens)
 
-	fmt.Println("Server started at :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
-
-}
-
-func convertHandler(w http.ResponseWriter, r *http.Request) {
-	var req QueryRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
-		return
-	}
-
-	is := antlr.NewInputStream(req.Query)
-	lexer := parser.NewQueryLexer(is)
-
-	tokenStream := antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
-	p := parser.NewQueryParser(tokenStream)
+	// 解析并生成语法树
 	tree := p.Query()
 
-	parsedQuery := Visit(tree)
+	// 创建自定义监听器
+	listener := parser.NewCustomIqlListener()
 
-	esQuery, err := convertToElasticsearch(parsedQuery.(ParsedQuery))
-	if err != nil {
-		fmt.Println("Error converting to Elasticsearch query:", err)
-		return
+	// 使用 ParseTreeWalker 遍历解析树
+	antlr.ParseTreeWalkerDefault.Walk(listener, tree)
+
+	// 获取生成的 QueryDSL
+	queryDSL := listener.GetQueryDSL()
+	fmt.Println("Generated Query DSL:", queryDSL)
+
+	// 输出所有字段
+	fmt.Println("Fields:")
+	for field := range listener.GetFields() {
+		fmt.Println(field)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]any{"query": esQuery.String()})
+	// sort
+	fmt.Println("Sort:")
+	sortMaps := listener.GetSortMaps()
+	for index := range sortMaps {
+		for field, order := range sortMaps[index] {
+			fmt.Println(field, order)
+		}
+	}
+
 }

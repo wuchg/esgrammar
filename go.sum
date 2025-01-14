@@ -1,4 +1,6 @@
 github.com/antlr4-go/antlr/v4 v4.13.1 h1:SqQKkuVZ+zWkMMNkjy5FZe5mr5WURWnlpmOuzYWrPrQ=
 github.com/antlr4-go/antlr/v4 v4.13.1/go.mod h1:GKmUxMtwp6ZgGwZSva4eWPC5mS6vUAmOABFgjdkM7Nw=
+github.com/bakyazi/esgrammar v0.0.0-20240522192119-3ec27a4cf9c7 h1:z7jkl6ibBdYNv35kJQExczNNlLtCm4AGEBt81tYlNO8=
+github.com/bakyazi/esgrammar v0.0.0-20240522192119-3ec27a4cf9c7/go.mod h1:BqsDFffEK3e2dIC5khA3vNSEClLbxzcgGX3mI2XGDOE=
 golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842 h1:vr/HnozRka3pE4EsMEg1lgkXJkTFJCVUX+S/ZT6wYzM=
 golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842/go.mod h1:XtvwrStGgqGPLc4cjQfWqZHG1YFdYs6swckp8vpsjnc=

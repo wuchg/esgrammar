@@ -1,2 +1,2 @@
 grammar:
-	antlr -Dlanguage=Go parser/Query.g4
+	java -jar ~/Downloads/antlr-4.13.2-complete.jar -Dlanguage=Go parser/Iql.g4
